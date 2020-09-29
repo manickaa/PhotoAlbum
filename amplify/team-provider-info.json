@@ -1,0 +1,20 @@
+{
+  "vscode": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-photoalbum-vscode-122215-authRole",
+      "UnauthRoleArn": "arn:aws:iam::429748185121:role/amplify-photoalbum-vscode-122215-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::429748185121:role/amplify-photoalbum-vscode-122215-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-photoalbum-vscode-122215-deployment",
+      "UnauthRoleName": "amplify-photoalbum-vscode-122215-unauthRole",
+      "StackName": "amplify-photoalbum-vscode-122215",
+      "StackId": "arn:aws:cloudformation:us-east-1:429748185121:stack/amplify-photoalbum-vscode-122215/edf638d0-01bf-11eb-b4e3-0e65dccd8cb7",
+      "AmplifyAppId": "d1pb7htmx7atkl"
+    },
+    "categories": {
+      "auth": {
+        "photoalbum6fe19ba6": {}
+      }
+    }
+  }
+}

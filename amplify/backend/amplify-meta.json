@@ -1,0 +1,63 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-photoalbum-vscode-122215-authRole",
+      "UnauthRoleArn": "arn:aws:iam::429748185121:role/amplify-photoalbum-vscode-122215-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::429748185121:role/amplify-photoalbum-vscode-122215-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-photoalbum-vscode-122215-deployment",
+      "UnauthRoleName": "amplify-photoalbum-vscode-122215-unauthRole",
+      "StackName": "amplify-photoalbum-vscode-122215",
+      "StackId": "arn:aws:cloudformation:us-east-1:429748185121:stack/amplify-photoalbum-vscode-122215/edf638d0-01bf-11eb-b4e3-0e65dccd8cb7",
+      "AmplifyAppId": "d1pb7htmx7atkl"
+    }
+  },
+  "auth": {
+    "photoalbum6fe19ba6": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/auth/photoalbum6fe19ba6-cloudformation-template.yml",
+        "logicalId": "authphotoalbum6fe19ba6"
+      },
+      "lastPushTimeStamp": "2020-09-28T23:45:56.329Z",
+      "output": {
+        "AppClientSecret": "4sg1tp5gtbu2blhggcvnsb5ptt22d68859ndg996hi78vcdcbci",
+        "UserPoolId": "us-east-1_zeddpWLBk",
+        "AppClientIDWeb": "16i4npi7n289p4uqqmihn58uv5",
+        "AppClientID": "3mpqfrn6a8e129oqko62fn5ogu",
+        "IdentityPoolId": "us-east-1:1deb4ce9-78f2-42ee-ba85-4266e66390a7",
+        "IdentityPoolName": "photoalbum6fe19ba6_identitypool_6fe19ba6__vscode",
+        "UserPoolName": "photoalbum6fe19ba6_userpool_6fe19ba6"
+      },
+      "lastPushDirHash": "yPgalZ4ZK77iy0TcM4YIk3c2/qQ="
+    }
+  },
+  "api": {
+    "photoalbum": {
+      "service": "AppSync",
+      "providerPlugin": "awscloudformation",
+      "output": {
+        "authConfig": {
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authphotoalbum6fe19ba6"
+            }
+          },
+          "additionalAuthenticationProviders": []
+        },
+        "GraphQLAPIIdOutput": "asghcmv6b5dado6ticsrzp5kau",
+        "GraphQLAPIEndpointOutput": "https://y65skph4wzhclnajwswivd2zbm.appsync-api.us-east-1.amazonaws.com/graphql"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+        "logicalId": "apiphotoalbum"
+      },
+      "lastPushTimeStamp": "2020-09-28T23:45:59.133Z",
+      "lastPushDirHash": "BXNHmktWGoU9rzX65EbBg/ol+AU="
+    }
+  }
+}

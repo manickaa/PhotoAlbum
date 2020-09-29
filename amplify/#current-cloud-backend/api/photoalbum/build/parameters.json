@@ -1,0 +1,14 @@
+{
+    "CreateAPIKey": 0,
+    "AppSyncApiName": "photoalbum",
+    "DynamoDBBillingMode": "PAY_PER_REQUEST",
+    "DynamoDBEnableServerSideEncryption": false,
+    "AuthCognitoUserPoolId": {
+        "Fn::GetAtt": [
+            "authphotoalbum6fe19ba6",
+            "Outputs.UserPoolId"
+        ]
+    },
+    "S3DeploymentBucket": "amplify-photoalbum-vscode-122215-deployment",
+    "S3DeploymentRootKey": "amplify-appsync-files/d007a1bfcbb214a0487de478d72410e9444ba7a1"
+}
