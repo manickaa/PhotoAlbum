@@ -22,7 +22,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/auth/photoalbum6fe19ba6-cloudformation-template.yml",
         "logicalId": "authphotoalbum6fe19ba6"
       },
-      "lastPushTimeStamp": "2020-09-28T23:45:56.329Z",
+      "lastPushTimeStamp": "2020-09-29T18:53:28.444Z",
       "output": {
         "AppClientSecret": "4sg1tp5gtbu2blhggcvnsb5ptt22d68859ndg996hi78vcdcbci",
         "UserPoolId": "us-east-1_zeddpWLBk",
@@ -56,7 +56,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/api/cloudformation-template.json",
         "logicalId": "apiphotoalbum"
       },
-      "lastPushTimeStamp": "2020-09-28T23:45:59.133Z",
+      "lastPushTimeStamp": "2020-09-29T18:53:28.448Z",
       "lastPushDirHash": "BXNHmktWGoU9rzX65EbBg/ol+AU="
     }
   }
