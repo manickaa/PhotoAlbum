@@ -8,15 +8,25 @@ import './App.css';
 import { Grid, Header, Input, List, Segment } from 'semantic-ui-react';
 import '@aws-amplify/ui/dist/style.css';
 
+import {BrowserRouter, Route, NavLink} from 'react-router-dom';
+
 Amplify.configure(aws_exports);
 
-//Query all albums and store it in a string
+//Query to get all albums and store it in a string
 const ListAlbums = `query ListAlbums {
   listAlbums(limit: 9999) {
     items {
       id
       name
     }
+  }
+}`;
+
+//Query to get all the details of a particular album
+const GetAlbum = `query GetAlbum($id: ID!) {
+  getAlbum(id: $id) {
+    id
+    name
   }
 }`;
 
