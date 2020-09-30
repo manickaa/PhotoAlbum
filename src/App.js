@@ -1,14 +1,16 @@
 import React, {Component}  from 'react';
 import {Connect} from 'aws-amplify-react';
-import {API, graphqlOperation} from 'aws-amplify';
+import {API, graphqlOperation, Storage} from 'aws-amplify';
 import Amplify from 'aws-amplify';
 import aws_exports from './aws-exports';
 import { withAuthenticator } from 'aws-amplify-react';
 import './App.css';
-import { Grid, Header, Input, List, Segment } from 'semantic-ui-react';
+import { Form, Grid, Header, Input, List, Segment } from 'semantic-ui-react';
 import '@aws-amplify/ui/dist/style.css';
 
 import {BrowserRouter, Route, NavLink} from 'react-router-dom';
+
+import {v4 as uuid} from 'uuid';
 
 Amplify.configure(aws_exports);
 
@@ -157,7 +159,7 @@ class AlbumDetails extends Component {
     return(
       <Segment>
         <Header as='h3'>{this.props.album.name}</Header>
-        <p>Todo: allow photo uploads</p>
+        <ImageStorage albumId={this.props.album.id} />
         <p>Todo: display pictures of this album</p>
       </Segment>
     );
@@ -189,6 +191,52 @@ class AlbumDetailsLoader extends Component {
   }
 }
 
+//ImageStorage component for uploading photo to s3 bucket
+class ImageStorage extends Component {
+  //create a state for uploading
+  constructor(props) {
+    super(props);
+    this.state = {uploading: false}
+  }
+
+  //async function to handle component while uploading
+  onChange = async(event) => {
+    const file = event.target.files[0];
+    const fileName = uuid();
+
+    this.setState({uploading: true});
+
+    const result = await Storage.put(
+      fileName,
+      file,
+      {
+        customPrefix: {public: 'uploads/'},
+        metadata: {albumid: this.props.albumId}
+      }
+    );
+    console.log('Uploaded file:', result);
+    this.setState({uploading: false});
+  }
+  render() {
+    return(
+      <div>
+        <Form.Button
+            onClick = {() => document.getElementById('add-image-file-input').click()}
+            disabled = {this.state.uploading}
+            icon = 'file image outline'
+            content = { this.state.uploading ? 'Uploading...' : 'Add Image'}
+        />
+        <input 
+            id = 'add-image-file-input'
+            type= 'file'
+            accept = "image/*"
+            onChange = {this.onChange}
+            style = {{display: 'none'}}
+          />
+      </div>
+    );
+  }
+}
 //wrap the App component with AlbumListLoader
 class App extends Component {
   render() {
