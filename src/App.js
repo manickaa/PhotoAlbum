@@ -150,6 +150,30 @@ class AlbumListLoader extends Component {
   }
 }
 
+//AlbumDetailsLoader component to get the details of a particular album
+class AlbumDetailsLoader extends Component {
+  render() {
+    return(
+      <Connect
+        query={graphqlOperation(GetAlbum, {
+          id: this.props.id
+        })}>
+          {({data, loading, errors}) => {
+            if(loading) {
+              return <div>Loading...</div>
+            }
+            if(errors.length > 0) {
+              return <div>{JSON.stringify(errors)}</div>
+            }
+            if(!data.getAlbum) {
+              return
+            }
+            return <AlbumDetails album={data.getAlbum} />;
+          }}
+      </Connect>
+    );
+  }
+}
 
 //wrap the App component with AlbumListLoader
 class App extends Component {
