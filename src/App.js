@@ -150,6 +150,20 @@ class AlbumListLoader extends Component {
   }
 }
 
+//AlbumDetails component to display all the details extracted from a particular album
+
+class AlbumDetails extends Component {
+  render() {
+    return(
+      <Segment>
+        <Header as='h3'>{this.props.album.name}</Header>
+        <p>Todo: allow photo uploads</p>
+        <p>Todo: display pictures of this album</p>
+      </Segment>
+    );
+  }
+}
+
 //AlbumDetailsLoader component to get the details of a particular album
 class AlbumDetailsLoader extends Component {
   render() {
@@ -179,12 +193,28 @@ class AlbumDetailsLoader extends Component {
 class App extends Component {
   render() {
     return (
-      <Grid padded>
-        <Grid.Column>
-          <CreateNewAlbum />
-          <AlbumListLoader/>
-        </Grid.Column>
-      </Grid>
+      //Add router
+      <Router>
+        <Grid padded>
+          <Grid.Column>
+            <Route path="/" exact component= {CreateNewAlbum} />
+            <Route path="/" exact component= {AlbumListLoader}/>
+
+            <Route path="/albums/:albumId" 
+                   render={() => 
+                      <div><NavLink to="/">Back</NavLink></div>
+                  }
+              />
+            
+            <Route path="/albums/:albumId"
+                   render={props => 
+                      <AlbumDetailsLoader id={props.match.params.albumId} />
+                  }
+              />
+          </Grid.Column>
+        </Grid>
+      </Router>
+      
     );
   }
 }
