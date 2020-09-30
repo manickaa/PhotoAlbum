@@ -22,7 +22,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/auth/photoalbum6fe19ba6-cloudformation-template.yml",
         "logicalId": "authphotoalbum6fe19ba6"
       },
-      "lastPushTimeStamp": "2020-09-29T18:53:28.444Z",
+      "lastPushTimeStamp": "2020-09-30T05:13:23.566Z",
       "output": {
         "AppClientSecret": "4sg1tp5gtbu2blhggcvnsb5ptt22d68859ndg996hi78vcdcbci",
         "UserPoolId": "us-east-1_zeddpWLBk",
@@ -56,8 +56,57 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/api/cloudformation-template.json",
         "logicalId": "apiphotoalbum"
       },
-      "lastPushTimeStamp": "2020-09-29T18:53:28.448Z",
+      "lastPushTimeStamp": "2020-09-30T05:13:23.574Z",
       "lastPushDirHash": "BXNHmktWGoU9rzX65EbBg/ol+AU="
+    }
+  },
+  "function": {
+    "S3Trigger9bcd61a7": {
+      "service": "Lambda",
+      "providerPlugin": "awscloudformation",
+      "build": true,
+      "lastBuildTimeStamp": "2020-09-30T05:10:45.958Z",
+      "lastPackageTimeStamp": "2020-09-30T05:10:46.011Z",
+      "distZipFilename": "S3Trigger9bcd61a7-484e784b6c2b75715036-build.zip",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/function/S3Trigger9bcd61a7-cloudformation-template.json",
+        "logicalId": "functionS3Trigger9bcd61a7"
+      },
+      "lastPushTimeStamp": "2020-09-30T05:13:23.592Z",
+      "output": {
+        "Region": "us-east-1",
+        "Arn": "arn:aws:lambda:us-east-1:429748185121:function:S3Trigger9bcd61a7-vscode",
+        "Name": "S3Trigger9bcd61a7-vscode",
+        "LambdaExecutionRole": "S3Trigger9bcd61a7LambdaRole9bcd61a7-vscode"
+      },
+      "lastPushDirHash": "/cKGnrGmpdIGzG0DonQZqxkVV6c="
+    }
+  },
+  "storage": {
+    "photoalbumStorage": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "function",
+          "resourceName": "S3Trigger9bcd61a7",
+          "attributes": [
+            "Name",
+            "Arn",
+            "LambdaExecutionRole"
+          ]
+        }
+      ],
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/storage/s3-cloudformation-template.json",
+        "logicalId": "storagephotoalbumStorage"
+      },
+      "lastPushTimeStamp": "2020-09-30T05:13:23.592Z",
+      "output": {
+        "BucketName": "photoalbumdfbc22be16d24a6cb6f541ac05bc2149122215-vscode",
+        "Region": "us-east-1"
+      },
+      "lastPushDirHash": "XZ9r3qUMxmjpE7evbxsFDS3IJQY="
     }
   }
 }
