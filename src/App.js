@@ -97,9 +97,9 @@ class CreateNewAlbum extends Component {
 class AlbumList extends Component {
   albumItems () {
     return this.props.albums.map(album => 
-      <li key={album.id}>
-        {album.name}
-      </li>
+      <List.Item key={album.id}>
+        <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>
+      </List.Item>
       );
   }
 
@@ -194,7 +194,7 @@ class App extends Component {
   render() {
     return (
       //Add router
-      <Router>
+      <BrowserRouter>
         <Grid padded>
           <Grid.Column>
             <Route path="/" exact component= {CreateNewAlbum} />
@@ -213,7 +213,7 @@ class App extends Component {
               />
           </Grid.Column>
         </Grid>
-      </Router>
+      </BrowserRouter>
       
     );
   }
