@@ -5,11 +5,10 @@ import Amplify from 'aws-amplify';
 import aws_exports from './aws-exports';
 import { withAuthenticator, S3Image } from 'aws-amplify-react';
 import './App.css';
-import { Divider, Form, Grid, Header, Input, List, Segment, Button, Modal, Icon } from 'semantic-ui-react';
+import { Divider, Form, Grid, Header, Input, List, Segment, Modal, Placeholder } from 'semantic-ui-react';
 import '@aws-amplify/ui/dist/style.css';
-
 import {BrowserRouter, Route, NavLink} from 'react-router-dom';
-
+import gif from './giphy.gif';
 import {v4 as uuid} from 'uuid';
 
 Amplify.configure(aws_exports);
@@ -89,9 +88,10 @@ class CreateNewAlbum extends Component {
 
   render() {
     return(
-      <Segment>
+      <Segment color="orange">
         <Header as='h3'>Add New Album</Header>
         <Input
+          style={{color: 'orange'}}
           type='text'
           placeholder='New Album Name'
           icon='plus'
@@ -110,14 +110,14 @@ class AlbumList extends Component {
   albumItems () {
     return this.props.albums.map(album => 
       <List.Item key={album.id}>
-        <NavLink to={`/albums/${album.id}`}>{album.name}</NavLink>
+        <NavLink style={{color: 'orange'}} to={`/albums/${album.id}`}>{album.name}</NavLink>
       </List.Item>
       );
   }
 
   render() {
     return (
-      <Segment>
+      <Segment color="orange">
         <Header as="h3">My Albums</Header>
         <List divided relaxed>
           {this.albumItems()}
@@ -168,7 +168,7 @@ class AlbumDetails extends Component {
   render() {
     if(!this.props.album) return 'Loading Album...';
     return(
-      <Segment>
+      <Segment color="orange">
         <Header as='h3'>{this.props.album.name}</Header>
         <ImageStorage albumId={this.props.album.id} />
         <PhotoList photos={this.props.album.photos.items}/>
@@ -330,15 +330,21 @@ class PhotoList extends Component {
     });
   }
   photoItems() {
-    //console.log(this.props.photos)
-    return this.props.photos.map(photo => 
+    console.log(this.props.photos.length)
+    return (this.props.photos.length > 0) ? this.props.photos.map(photo => 
         <S3Image
           key={photo.thumbnail.key}
           imgKey = {photo.thumbnail.key.replace('public/', '')}
           style={{display: 'inline-block', 'paddingRight': '5px'}}
           onClick={this.handleClick.bind(this, photo)}
         />
-      );
+      ) : 
+      <Placeholder>
+        <Placeholder.Paragraph>
+          Oopsie...The album is empty! Try adding photos
+        </Placeholder.Paragraph>
+        <img src={gif} alt="Nothing.." />
+      </Placeholder>;
   }
   showModalBox() {
     return this.state.selectedPhoto ? 
