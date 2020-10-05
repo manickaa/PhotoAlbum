@@ -1,14 +1,15 @@
 {
-  "name": "hello_world",
+  "name": "photo_processor",
   "version": "1.0.0",
-  "description": "hello world sample for NodeJS",
+  "description": "Photo Album",
   "main": "app.js",
   "repository": "https://github.com/awslabs/aws-sam-cli/tree/develop/samcli/local/init/templates/cookiecutter-aws-sam-hello-nodejs",
   "author": "SAM CLI",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0",
-    "sharp": "^0.26.1"
+    "sharp": "^0.26.1",
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "test": "mocha tests/unit/"
