@@ -4,36 +4,88 @@ Description: >
   photo_processor
 
   Sample SAM Template for photo_processor
-  
+
+Parameters:
+  S3UserfilesBucketArn:
+    Type: String
+  DynamoDBPhotosTableArn:
+    Type: String
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 10
 
 Resources:
-  HelloWorldFunction:
+  PhotoProcessorFunctionIamRole: 
+        Type: "AWS::IAM::Role"
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: "2012-10-17"
+                Statement:
+                    - 
+                        Effect: Allow
+                        Principal:
+                            Service: [lambda.amazonaws.com]
+                        Action: ["sts:AssumeRole"]
+            ManagedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
+            Path: "/"
+            Policies: 
+                - 
+                    PolicyName: "AllPrivsForPhotoAlbumUserfilesBucket"
+                    PolicyDocument: 
+                        Version: "2012-10-17"
+                        Statement: 
+                            -
+                                Effect: "Allow"
+                                Action: "s3:*"
+                                Resource: !Join ["/", [!Ref S3UserfilesBucketArn, "*"]]
+                -
+                    PolicyName: "AllPrivsForDynamo"
+                    PolicyDocument:
+                        Version: "2012-10-17"
+                        Statement:
+                            -
+                                Effect: "Allow"
+                                Action: "dynamodb:*"
+                                Resource:
+                                  - !Ref DynamoDBPhotosTableArn
+                              
+  PhotoProcessorFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: hello-world/
+      CodeUri: src/
       Handler: app.lambdaHandler
+      Role: !GetAtt PhotoProcessorFunctionIamRole.Arn
       Runtime: nodejs12.x
-      Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /hello
-            Method: get
-
+      Environment:
+        Variables:
+          THUMBNAIL_WIDTH: 80
+          THUMBNAIL_HEIGHT: 80
+          DYNAMODB_PHOTOS_TABLE_ARN: !Ref DynamoDBPhotosTableArn
+  BucketPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: 'lambda:InvokeFunction'
+            FunctionName: !Ref PhotoProcessorFunction
+            Principal: s3.amazonaws.com
+            SourceAccount: !Ref "AWS::AccountId"
+            SourceArn: !Ref S3UserfilesBucketArn
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  # HelloWorldApi:
+  #   Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+  #   Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  # HelloWorldFunction:
+  #   Description: "Hello World Lambda Function ARN"
+  #   Value: !GetAtt HelloWorldFunction.Arn
+  # HelloWorldFunctionIamRole:
+  #   Description: "Implicit IAM Role created for Hello World function"
+  #   Value: !GetAtt HelloWorldFunctionRole.Arn
+    PhotoProcessorFunction:
+      Description: "Photo Processor Lambda Function ARN"
+      Value: !GetAtt PhotoProcessorFunction.Arn 
+    PhotoProcessorFunctionIamRole:
+      Description: "IAM Role created for Photo Processor Function"
+      Value: !GetAtt PhotoProcessorFunctionIamRole.Arn
