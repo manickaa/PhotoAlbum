@@ -3,9 +3,9 @@ import {Connect} from 'aws-amplify-react';
 import {API, graphqlOperation, Storage} from 'aws-amplify';
 import Amplify from 'aws-amplify';
 import aws_exports from './aws-exports';
-import { withAuthenticator } from 'aws-amplify-react';
+import { withAuthenticator, S3Image } from 'aws-amplify-react';
 import './App.css';
-import { Form, Grid, Header, Input, List, Segment } from 'semantic-ui-react';
+import { Divider, Form, Grid, Header, Input, List, Segment, Button, Modal, Icon } from 'semantic-ui-react';
 import '@aws-amplify/ui/dist/style.css';
 
 import {BrowserRouter, Route, NavLink} from 'react-router-dom';
@@ -25,10 +25,20 @@ const ListAlbums = `query ListAlbums {
 }`;
 
 //Query to get all the details of a particular album
-const GetAlbum = `query GetAlbum($id: ID!) {
+const GetAlbum = `query GetAlbum($id: ID!, $nextTokenForPhotos: String) {
   getAlbum(id: $id) {
     id
     name
+    photos(sortDirection: DESC, nextToken: $nextTokenForPhotos) {
+      items {
+        thumbnail {
+          width
+          height
+          key
+        }
+      }
+      nextToken
+    }
   }
 }`;
 
@@ -156,11 +166,21 @@ class AlbumListLoader extends Component {
 
 class AlbumDetails extends Component {
   render() {
+    if(!this.props.album) return 'Loading Album...';
     return(
       <Segment>
         <Header as='h3'>{this.props.album.name}</Header>
         <ImageStorage albumId={this.props.album.id} />
-        <p>Todo: display pictures of this album</p>
+        <PhotoList photos={this.props.album.photos.items}/>
+        {
+          this.props.hasMorePhotos &&
+            <Form.Button
+                onClick={this.props.loadMorePhotos}
+                icon='refresh'
+                disabled={this.props.loadingPhotos}
+                content={this.props.loadingPhotos ? 'Loading...' : 'Load more'}
+            />
+        }
       </Segment>
     );
   }
@@ -168,26 +188,58 @@ class AlbumDetails extends Component {
 
 //AlbumDetailsLoader component to get the details of a particular album
 class AlbumDetailsLoader extends Component {
+  
+  //add state to handle load more photos, if some photos are not loaded
+  constructor(props) {
+    super(props);
+    this.state = {
+      nextTokenForPhotos: null,
+      hasMorePhotos: true,
+      album: null,
+      loading: true
+    }
+  }
+
+  async loadMorePhotos() {
+    if (!this.state.hasMorePhotos) {
+      return;
+    }
+    this.setState({loading: true});
+
+    const {data} = await API.graphql(graphqlOperation(GetAlbum,
+      {
+        id: this.props.id,
+        nextTokenForPhotos: this.state.nextTokenForPhotos
+      }
+    ));
+
+    let album;
+    if(this.state.album === null) {
+      album = data.getAlbum;
+    } else {
+      album = this.state.album;
+      album.photos.items = album.photos.items.concat(data.getAlbum.photos.items);
+    }
+    this.setState({
+      album: album,
+      loading: false,
+      nextTokenForPhotos: data.getAlbum.photos.nextToken,
+      hasMorePhotos: data.getAlbum.photos.nextToken !== null
+    });
+  
+  }
+
+  componentDidMount() {
+    this.loadMorePhotos();
+  }
   render() {
     return(
-      <Connect
-        query={graphqlOperation(GetAlbum, {
-          id: this.props.id
-        })}>
-          {({data, loading, errors}) => {
-            if(loading) {
-              return <div>Loading...</div>
-            }
-            if(errors.length > 0) {
-              return <div>{JSON.stringify(errors)}</div>
-            }
-            if(!data.getAlbum) {
-              return
-            }
-            return <AlbumDetails album={data.getAlbum} />;
-          }}
-      </Connect>
-    );
+      <AlbumDetails 
+          loadingPhotos={this.state.loading}
+          album={this.state.album}
+          loadMorePhotos={this.loadMorePhotos.bind(this)}
+          hasMorePhotos={this.state.hasMorePhotos}
+      />);
   }
 }
 
@@ -217,6 +269,7 @@ class ImageStorage extends Component {
     console.log('Uploaded file:', result);
     this.setState({uploading: false});
   }
+
   render() {
     return(
       <div>
@@ -233,6 +286,72 @@ class ImageStorage extends Component {
             onChange = {this.onChange}
             style = {{display: 'none'}}
           />
+      </div>
+    );
+  }
+}
+class ModalBox extends Component {
+  render() {
+    return(
+      <Modal
+        closeIcon
+        onClose={this.props.closed}
+        open={this.props.photo !== null}
+      >
+        <Modal.Header>{this.props.photo.thumbnail.key.replace('public/resized/', '')}</Modal.Header>
+        <Modal.Content image>
+              <S3Image
+                key = {this.props.photo.thumbnail.key.replace('/resized', '')}
+                imgKey={this.props.photo.thumbnail.key.replace('public/resized/', '')}
+                theme={{photoImg: {maxWidth: '100%'}}}
+              />
+        </Modal.Content>
+      </Modal>
+    );
+  }
+}
+//component to render all the thumbnails of the selected album
+class PhotoList extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedPhoto: null
+    };
+  }
+  handleClick = (photo) => {
+    this.setState({
+      selectedPhoto: photo
+    });
+  }
+
+  handleClose = () => {
+    this.setState({
+      selectedPhoto: null
+    });
+  }
+  photoItems() {
+    //console.log(this.props.photos)
+    return this.props.photos.map(photo => 
+        <S3Image
+          key={photo.thumbnail.key}
+          imgKey = {photo.thumbnail.key.replace('public/', '')}
+          style={{display: 'inline-block', 'paddingRight': '5px'}}
+          onClick={this.handleClick.bind(this, photo)}
+        />
+      );
+  }
+  showModalBox() {
+    return this.state.selectedPhoto ? 
+      <ModalBox 
+        photo={this.state.selectedPhoto}
+        closed={this.handleClose}/> : null;
+  }
+  render() {
+    return(
+      <div className="Aishwarya">
+        <Divider hidden/>
+        {this.photoItems()}
+        {this.showModalBox()}
       </div>
     );
   }
@@ -267,4 +386,12 @@ class App extends Component {
   }
 }
 
-export default withAuthenticator(App, {includeGreetings: true});
+export default withAuthenticator(App, 
+    {
+      signUpConfig: 
+      {
+        hiddenDefaults: ["phone_number"]
+      },
+      usernameAttributes: "email",
+      includeGreetings: true,
+    });
