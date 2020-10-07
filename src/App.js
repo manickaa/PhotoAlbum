@@ -5,7 +5,7 @@ import Amplify from 'aws-amplify';
 import aws_exports from './aws-exports';
 import { withAuthenticator, S3Image } from 'aws-amplify-react';
 import './App.css';
-import { Divider, Form, Grid, Header, Input, List, Segment, Modal, Placeholder } from 'semantic-ui-react';
+import { Divider, Form, Grid, Header, Icon, Input, List, Segment, Modal, Placeholder } from 'semantic-ui-react';
 import '@aws-amplify/ui/dist/style.css';
 import {BrowserRouter, Route, NavLink} from 'react-router-dom';
 import gif from './giphy.gif';
@@ -28,15 +28,17 @@ const GetAlbum = `query GetAlbum($id: ID!, $nextTokenForPhotos: String) {
   getAlbum(id: $id) {
     id
     name
+    members
     photos(sortDirection: DESC, nextToken: $nextTokenForPhotos) {
+      nextToken
       items {
+        id
         thumbnail {
           width
           height
           key
         }
       }
-      nextToken
     }
   }
 }`;
@@ -48,7 +50,6 @@ const SubscribeToNewAlbum = `subscription onCreateAlbum {
     name
   }
 }`;
-
 //NewAlbum component to create new album and save it
 class CreateNewAlbum extends Component {
   
@@ -79,11 +80,18 @@ class CreateNewAlbum extends Component {
       }
     }`;
 
+    
     //Log the created album's id to console
-    const result = await API.graphql(graphqlOperation(NewAlbum, {
-      name: this.state.albumName
-    }));
-    console.info(`Created album with id ${result.data.createAlbum.id}`);
+    try {
+      const result = await API.graphql(graphqlOperation(NewAlbum, {
+        name: this.state.albumName
+      }));
+      console.info(`Created album with id ${result.data.createAlbum.id}`);
+      this.setState({albumName: ''});
+    }
+    catch(err) {
+      console.error('NewAlbum mutation failed', err);
+    }
   }
 
   render() {
@@ -108,11 +116,15 @@ class CreateNewAlbum extends Component {
 //Albumlist component for rendering a sorted list of album names
 class AlbumList extends Component {
   albumItems () {
-    return this.props.albums.map(album => 
+    return this.props.albums.length > 0 ? this.props.albums.map(album => 
       <List.Item key={album.id}>
         <NavLink style={{color: 'orange'}} to={`/albums/${album.id}`}>{album.name}</NavLink>
       </List.Item>
-      );
+      ) : <Placeholder>
+          <Placeholder.Paragraph>
+          There is nothing to show...Try creating an album
+          </Placeholder.Paragraph>
+          </Placeholder>;
   }
 
   render() {
@@ -170,6 +182,14 @@ class AlbumDetails extends Component {
     return(
       <Segment color="orange">
         <Header as='h3'>{this.props.album.name}</Header>
+        <Segment.Group>
+          <Segment>
+            <AlbumMembers members={this.props.album.members} />
+          </Segment>
+          <Segment basic>
+            <AddUsernameToAlbum albumId={this.props.album.id} />
+          </Segment>
+        </Segment.Group>
         <ImageStorage albumId={this.props.album.id} />
         <PhotoList photos={this.props.album.photos.items}/>
         {
@@ -228,7 +248,6 @@ class AlbumDetailsLoader extends Component {
     });
   
   }
-
   componentDidMount() {
     this.loadMorePhotos();
   }
@@ -291,8 +310,32 @@ class ImageStorage extends Component {
   }
 }
 class ModalBox extends Component {
-  render() {
-    return(
+  constructor(props) {
+    super(props);
+    this.state = {
+      deleteCompleted: false
+    }
+  }
+  deletePicture = async(imageId) => {
+    console.log(imageId);
+    const DeletePhoto = `mutation DeletePhoto($id: ID!) {
+      deletePhoto(input: {id: $id}) {
+        id
+      }
+    }`;
+    try {
+      const result = await API.graphql(graphqlOperation(DeletePhoto, {
+        id: imageId
+      }));
+      this.setState({deleteCompleted: true})
+      console.info(`Deleted photo with id ${result.data.deletePhoto.id}`);
+    }
+    catch(err) {
+      console.error('DeletePhoto mutation failed', err);
+    }
+  }
+  showModal = () => {
+    return ( !this.state.deleteCompleted ? 
       <Modal
         closeIcon
         onClose={this.props.closed}
@@ -306,7 +349,26 @@ class ModalBox extends Component {
                 theme={{photoImg: {maxWidth: '100%'}}}
               />
         </Modal.Content>
+        <Form.Button
+          onClick={this.deletePicture.bind(this, this.props.photo.id)}
+          style={{color: 'red' , marginLeft: '40%', marginBottom: '20px'}}
+          iconPosition='center'
+          content='Delete Picture'/>
+      </Modal> : 
+      <Modal
+        closeIcon
+        onClose={() => window.location.reload(false)}>
+          <Modal.Content>
+            Image deletion successful!!
+          </Modal.Content>
       </Modal>
+    );
+  }
+  render() {
+    return(
+      <div>
+        {this.showModal()}
+      </div>
     );
   }
 }
@@ -362,6 +424,75 @@ class PhotoList extends Component {
     );
   }
 }
+//component to add a user name to the album
+class AddUsernameToAlbum extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: ''
+    }
+  }
+  //we get username and value
+  handleChange = (event, {name, value}) => {
+    console.log(event);
+    console.log(name, value)
+    this.setState({
+      [name]: value
+    });
+  }
+
+  handleSubmit = async (event) => {
+    event.preventDefault();
+    const AddUsernameToAlbum = `
+    mutation AddUser($username: String!, $albumId: String!) {
+      addUsernameToAlbum(username: $username, albumId: $albumId) {
+          id
+      }
+    }`;
+    const result = await API.graphql(graphqlOperation(AddUsernameToAlbum, {
+      username: this.state.username,
+      albumId: this.props.albumId
+    }));
+    console.log(`Added ${this.state.username} to the album id ${result.data.addUsernameToAlbum.id}`);
+    this.setState({
+      username: ''
+    });
+  }
+  render() {
+    return(
+      <Input
+          type='text'
+          placeholder='Username'
+          icon='user plus'
+          iconPosition='left'
+          action={{content: 'Add', onClick: this.handleSubmit}}
+          name='username'
+          value={this.state.username}
+          onChange={this.handleChange}
+          style={{color: 'orange'}}
+      />
+    );
+  }
+}
+
+//component for AlbumMembers for the members list
+class AlbumMembers extends Component {
+  render() {
+    return(
+      <div>
+        <Header as='h4'>
+          <Icon name='user circle' />
+          <Header.Content>Members</Header.Content>
+        </Header>
+        <List bulleted>
+          {this.props.members && this.props.members.map((member) => 
+            <List.Item color='orange' key={member}>{member}</List.Item>
+          )}
+        </List>
+      </div>
+    );
+  }
+}
 //wrap the App component with AlbumListLoader
 class App extends Component {
   render() {
@@ -394,10 +525,5 @@ class App extends Component {
 
 export default withAuthenticator(App, 
     {
-      signUpConfig: 
-      {
-        hiddenDefaults: ["phone_number"]
-      },
-      usernameAttributes: "email",
       includeGreetings: true,
     });
