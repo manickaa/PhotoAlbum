@@ -200,6 +200,27 @@
 				}
 			}
 		},
+		"hostingamplifyhosting": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/hosting/amplifyhosting-template.json",
+				"Parameters": {
+					"appId": "d1pb7htmx7atkl",
+					"type": "manual",
+					"env": "vscode"
+				}
+			}
+		},
+		"hostingS3AndCloudFront": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/amplify-photoalbum-vscode-122215-deployment/amplify-cfn-templates/hosting/template.json",
+				"Parameters": {
+					"bucketName": "photoalbum-20201008122503-hostingbucket",
+					"env": "vscode"
+				}
+			}
+		},
 		"UpdateRolesWithIDPFunction": {
 			"DependsOn": [
 				"AuthRole",
